@@ -104,8 +104,8 @@ for i, a_iter in enumerate(a_iter_list):
     # Set labels and ticks
     ax[i].set_title('$a={:.4f}$'.format(aval))
     if i == fig_num - 1:
-        ax[i].set_xlabel('$p_0$')
-    ax[i].set_ylabel('$e_0$')
+        ax[i].set_xlabel('$p$')
+    ax[i].set_ylabel('$e$')
     ax[i].set_xscale('log')
     if i < fig_num - 1: # Only include x tick labels for bottom plot
         ax[i].tick_params(labelbottom=False)  
@@ -115,4 +115,4 @@ fig.subplots_adjust(right=0.8)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 cbar = fig.colorbar(pos, cax=cbar_ax)
 cbar.set_label('Time (minutes)')
-plt.savefig('timing.pdf', dpi=100)
+plt.savefig('flux_calculation_timing.pdf', dpi=300, bbox_inches='tight')
