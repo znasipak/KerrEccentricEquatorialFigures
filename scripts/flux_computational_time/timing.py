@@ -8,7 +8,6 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from few.utils.utility import get_separatrix
 # from seaborn import color_palette
 
 # use computer modern font
@@ -62,14 +61,15 @@ e_data_outer_full = data_outer["e0"].to_numpy().reshape(NU_outer, NW_outer, NZ_o
 time_max = timing_data_full.max()
 
 # Choose index of a slices to plot
-a_iter_list = [0, 18, 42, NZ-1] # must be even!
+# Choose z / a-slices to plot
+a_iter_list = [0, 18, 36, 50, 64] # must be even!
 fig_num = len(a_iter_list)
 
 # Choose aspect ratio for each subfigure
 aspect_ratio = 2/3
 
 # Create subplots
-fig, ax = plt.subplots(fig_num, 1, figsize=(6, 6*fig_num*aspect_ratio))
+fig, ax = plt.subplots(fig_num, 1, figsize=(6, 6*fig_num*aspect_ratio), sharex=True, sharey=True)
 
 # Iterate over different slices
 for i, a_iter in enumerate(a_iter_list):
@@ -82,8 +82,6 @@ for i, a_iter in enumerate(a_iter_list):
     # Take this slice of the data with constant aval
     p_data = p_data_full[:,:,a_iter]
     e_data = e_data_full[:,:,a_iter]
-    # Calculate LSO for this slice
-    pLSO_data = get_separatrix(aval, e_data.flatten(), 1).reshape(e_data.shape)
 
     # Outer grid data
     a_iter_outer = a_iter // 2 # Outer grid has half the resolution in a
@@ -98,16 +96,15 @@ for i, a_iter in enumerate(a_iter_list):
     # Take this slice of the outer data with constant aval
     p_data_outer = p_data_outer_full[:,:,a_iter_outer]
     e_data_outer = e_data_outer_full[:,:,a_iter_outer]
-    pLSO_data_outer = get_separatrix(aval, e_data_outer.flatten(), 1).reshape(e_data_outer.shape)
     
     # Generate scatter plots
-    ax[i].scatter(p_data_outer - pLSO_data_outer, e_data_outer, c=timing_data_outer, norm ='log', vmax=time_max/60, rasterized=True)
-    pos = ax[i].scatter(p_data - pLSO_data, e_data, c=timing_data, norm ='log', vmax=time_max/60, rasterized=True)
+    ax[i].scatter(p_data_outer, e_data_outer, c=timing_data_outer, norm ='log', s=1.0, vmax=time_max/60, rasterized=True, cmap='plasma')
+    pos = ax[i].scatter(p_data, e_data, c=timing_data, norm ='log', s=1.0, vmax=time_max/60, rasterized=True, cmap='plasma')
 
     # Set labels and ticks
     ax[i].set_title('$a={:.4f}$'.format(aval))
     if i == fig_num - 1:
-        ax[i].set_xlabel('$p_0 - p_\\mathrm{LSO}$')
+        ax[i].set_xlabel('$p_0$')
     ax[i].set_ylabel('$e_0$')
     ax[i].set_xscale('log')
     if i < fig_num - 1: # Only include x tick labels for bottom plot
@@ -118,7 +115,4 @@ fig.subplots_adjust(right=0.8)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 cbar = fig.colorbar(pos, cax=cbar_ax)
 cbar.set_label('Time (minutes)')
-
-# Show/save plot
-# plt.show()
 plt.savefig('timing.pdf', dpi=100)
